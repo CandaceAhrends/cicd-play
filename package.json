@@ -1,0 +1,33 @@
+{
+  "name": "scanner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "kill": "pkill -f node",
+    "s": "echo will start the scanner now.......",
+    "p": "echo will start the websocket for txn consumption!!!!!  SUCCESS",
+    "socket:prebuild": "cp package.json ./polysocket",
+    "start": "npm run start:socket & npm run s & npm run start:scanner & npm run p & npm run start:parser",
+    "start:scanner": "echo running scanner && node ./src/start.mjs",
+    "start:socket": "echo booting socket && node ./polyMarketData.mjs",
+    "start:parser": "echo starting reader && node ./parser/reader.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "ua-parser-js": "^1.0.37",
+    "websocket": "^1.0.34",
+    "ws": "^8.17.0",
+    "wscat": "^5.2.1"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
