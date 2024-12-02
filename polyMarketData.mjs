@@ -18,19 +18,17 @@ const wss = new WebSocketServer({ port: PORT });
 wss.on("connection", async function connection(ws) {
   console.log("web socket 8082 started");
   const sendMessageFn = (msg) => {
-    // console.log(msg)
     switch (msg.ev) {
       case "A":
-        if (msg.c > 1 && msg.c < 150) {
-          const txn = normalizeCandle(msg);
-          ws.send(
-            JSON.stringify({
-              type: "TXN",
-              ...txn,
-              time: dayjs(txn.time).format("HH:mm"),
-            })
-          );
-        }
+        const txn = normalizeCandle(msg);
+
+        ws.send(
+          JSON.stringify({
+            type: "TXN",
+            ...txn,
+            time: dayjs(txn.time).format("HH:mm"),
+          })
+        );
     }
   };
 

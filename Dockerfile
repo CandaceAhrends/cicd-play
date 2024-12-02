@@ -14,7 +14,6 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
-ENV POLYGON_APIKEY=test
 ENV POLYGON_SOCKET_PORT=8082
 ENV POLYGON_SOCKET_URL=wss://delayed.polygon.io/stocks
 

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poly-socket-deployment
+  labels:
+    app: poly-socket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poly-socket
+  template:
+    metadata:
+      labels:
+        app: poly-socket
+    spec:
+      containers:
+        - name: poly-socket-container
+          image: 968950512948.dkr.ecr.us-east-1.amazonaws.com/socket:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: POLYGON_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: poly-sec
+                  key: apikey
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poly-socket-service
+spec:
+  selector:
+    app: poly-socket # This selector should match the label of your pod
+  ports:
+    - protocol: TCP
+      port: 8082 # Port exposed within the cluster (can be any)
+      targetPort: 8082 # The port the pod listens on
+      nodePort: 30004 # The external port exposed on the node
+  type: NodePort # This exposes the service using NodePort
