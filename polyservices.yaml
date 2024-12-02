@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poly-services-deployment
+  labels:
+    app: poly-services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: poly-services
+  template:
+    metadata:
+      labels:
+        app: poly-services
+    spec:
+      containers:
+        - name: poly-services-container
+          image: 968950512948.dkr.ecr.us-east-1.amazonaws.com/polygonservices:latest
+          ports:
+            - containerPort: 7771
+          env:
+            - name: POLYGON_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: poly-sec
+                  key: apikey
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poly-services-service
+spec:
+  selector:
+    app: poly-services # This selector should match the label of your pod
+  ports:
+    - protocol: TCP
+      port: 7007 # Port exposed within the cluster (can be any)
+      targetPort: 7007 # The port the pod listens on
+      nodePort: 30001 # The external port exposed on the node
+  type: NodePort # This exposes the service using NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2/$3
+  name: poly-services-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: stockmarketviz.com
+      http:
+        paths:
+          - path: /poly-services(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: poly-services-service
+                port:
+                  number: 7007

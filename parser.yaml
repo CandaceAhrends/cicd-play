@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reader-deployment
+  labels:
+    app: reader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reader
+  template:
+    metadata:
+      labels:
+        app: reader
+    spec:
+      containers:
+        - name: reader-container
+          image: 968950512948.dkr.ecr.us-east-1.amazonaws.com/reader
+          ports:
+            - containerPort: 7771
+          env:
+            - name: POLYGON_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: poly-sec
+                  key: apikey
+      imagePullSecrets:
+        - name: ecr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reader-service
+spec:
+  selector:
+    app: reader # This selector should match the label of your pod
+  ports:
+    - protocol: TCP
+      port: 7771 # Port exposed within the cluster (can be any)
+      targetPort: 7771 # The port the pod listens on
+      nodePort: 30002 # The external port exposed on the node
+  type: NodePort # This exposes the service using NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /topvolume
+  name: reader-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: stockmarketviz.com
+      http:
+        paths:
+          - path: /read
+            pathType: Prefix
+            backend:
+              service:
+                name: reader-service
+                port:
+                  number: 7771
